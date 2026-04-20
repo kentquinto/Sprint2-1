@@ -1,0 +1,175 @@
+-- MySQL Workbench Forward Engineering
+
+SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
+SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
+SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
+
+-- -----------------------------------------------------
+-- Schema Optica
+-- -----------------------------------------------------
+
+-- -----------------------------------------------------
+-- Schema Optica
+-- -----------------------------------------------------
+CREATE SCHEMA IF NOT EXISTS `Optica` DEFAULT CHARACTER SET utf8 ;
+USE `Optica` ;
+
+-- -----------------------------------------------------
+-- Table `Optica`.`supplier`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `Optica`.`supplier` (
+  `supplier_id` INT NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(50) NOT NULL,
+  `street` VARCHAR(50) NOT NULL,
+  `number` VARCHAR(10) NOT NULL,
+  `floor` VARCHAR(10) NOT NULL,
+  `door` VARCHAR(10) NOT NULL,
+  `city` VARCHAR(35) NOT NULL,
+  `postal_code` VARCHAR(25) NOT NULL,
+  `country` VARCHAR(35) NOT NULL,
+  `phone` VARCHAR(25) NOT NULL,
+  `fax` VARCHAR(25) NOT NULL,
+  `nif` VARCHAR(15) NOT NULL,
+  PRIMARY KEY (`supplier_id`),
+  UNIQUE INDEX `Nif_UNIQUE` (`nif` ASC) VISIBLE)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `Optica`.`brand`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `Optica`.`brand` (
+  `brand_id` INT NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(50) NOT NULL,
+  `supplier_supplier_id` INT NOT NULL,
+  PRIMARY KEY (`brand_id`),
+  INDEX `fk_brand_supplier1_idx` (`supplier_supplier_id` ASC) VISIBLE,
+  CONSTRAINT `fk_brand_supplier1`
+    FOREIGN KEY (`supplier_supplier_id`)
+    REFERENCES `Optica`.`supplier` (`supplier_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `Optica`.`glasses`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `Optica`.`glasses` (
+  `glasses_id` INT NOT NULL AUTO_INCREMENT,
+  `frame_type` ENUM("Rimless", "Plastic", "Metal") NOT NULL,
+  `frame_color` VARCHAR(25) NOT NULL,
+  `left_lens_color` VARCHAR(25) NOT NULL,
+  `right_lens_color` VARCHAR(25) NOT NULL,
+  `left_lens_presciption` DECIMAL(10,2) NOT NULL,
+  `right_lens_prescription` DECIMAL(10,2) NOT NULL,
+  `price` DECIMAL(10,2) NOT NULL,
+  `brand_brand_id` INT NOT NULL,
+  PRIMARY KEY (`glasses_id`),
+  INDEX `fk_glasses_brand1_idx` (`brand_brand_id` ASC) VISIBLE,
+  CONSTRAINT `fk_glasses_brand1`
+    FOREIGN KEY (`brand_brand_id`)
+    REFERENCES `Optica`.`brand` (`brand_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `Optica`.`customer`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `Optica`.`customer` (
+  `customer_id` INT NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(50) NOT NULL,
+  `postal_address` VARCHAR(50) NOT NULL,
+  `phone` VARCHAR(25) NOT NULL,
+  `email` VARCHAR(50) NOT NULL,
+  `registration_date` DATETIME NOT NULL,
+  PRIMARY KEY (`customer_id`),
+  UNIQUE INDEX `Email_UNIQUE` (`email` ASC) VISIBLE)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `Optica`.`employee`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `Optica`.`employee` (
+  `employee_id` INT NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(50) NOT NULL,
+  PRIMARY KEY (`employee_id`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `Optica`.`sales`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `Optica`.`sales` (
+  `sales_id` INT NOT NULL AUTO_INCREMENT,
+  `sale_datetime` DATETIME NOT NULL,
+  `total` DECIMAL(10,2) NOT NULL COMMENT 'Total Price\n',
+  `customer_customer_id` INT NOT NULL,
+  `employee_employee_id` INT NOT NULL,
+  PRIMARY KEY (`sales_id`),
+  INDEX `fk_sales_customer1_idx` (`customer_customer_id` ASC) VISIBLE,
+  INDEX `fk_sales_employee1_idx` (`employee_employee_id` ASC) VISIBLE,
+  CONSTRAINT `fk_sales_customer1`
+    FOREIGN KEY (`customer_customer_id`)
+    REFERENCES `Optica`.`customer` (`customer_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_sales_employee1`
+    FOREIGN KEY (`employee_employee_id`)
+    REFERENCES `Optica`.`employee` (`employee_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `Optica`.`sale_item`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `Optica`.`sale_item` (
+  `quantity` INT NOT NULL,
+  `glasses_glasses_id` INT NOT NULL,
+  `sales_sales_id` INT NOT NULL,
+  PRIMARY KEY (`glasses_glasses_id`, `sales_sales_id`),
+  INDEX `fk_sale_item_glasses1_idx` (`glasses_glasses_id` ASC) VISIBLE,
+  INDEX `fk_sale_item_sales1_idx` (`sales_sales_id` ASC) VISIBLE,
+  CONSTRAINT `fk_sale_item_glasses1`
+    FOREIGN KEY (`glasses_glasses_id`)
+    REFERENCES `Optica`.`glasses` (`glasses_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_sale_item_sales1`
+    FOREIGN KEY (`sales_sales_id`)
+    REFERENCES `Optica`.`sales` (`sales_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `Optica`.`customer_has_customer`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `Optica`.`customer_has_customer` (
+  `customer_recommender_id` INT NOT NULL,
+  `customer_recommended_id` INT NOT NULL,
+  PRIMARY KEY (`customer_recommender_id`),
+  INDEX `fk_customer_has_customer_customer2_idx` (`customer_recommended_id` ASC) VISIBLE,
+  INDEX `fk_customer_has_customer_customer1_idx` (`customer_recommender_id` ASC) VISIBLE,
+  CONSTRAINT `fk_customer_has_customer_customer1`
+    FOREIGN KEY (`customer_recommender_id`)
+    REFERENCES `Optica`.`customer` (`customer_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_customer_has_customer_customer2`
+    FOREIGN KEY (`customer_recommended_id`)
+    REFERENCES `Optica`.`customer` (`customer_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+SET SQL_MODE=@OLD_SQL_MODE;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
